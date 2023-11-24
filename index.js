@@ -43,6 +43,19 @@ async function run() {
             sameSite: 'none',
         }).send({success: true})
     })
+    //logout api
+    app.post('/jwt/logout', async(req, res) =>{
+        try{
+            res.clearCookie('token', {
+                maxAge: 0,
+                secure: true,
+                sameSite: 'none',
+            }).send({success: true})
+        }
+        catch(err){
+            res.status(500).send(err)
+        }
+    })
 
 
 
