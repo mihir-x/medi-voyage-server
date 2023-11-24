@@ -49,7 +49,7 @@ async function run() {
         }).send({success: true})
     })
     //logout api
-    app.post('/jwt/logout', async(req, res) =>{
+    app.get('/jwt/logout', async(req, res) =>{
         try{
             res.clearCookie('token', {
                 maxAge: 0,
@@ -62,7 +62,8 @@ async function run() {
         }
     })
 
-    //users related api
+    //users related api-----------------------------
+    //save user info into database
     app.post('/users', async(req, res) =>{
         const user = req.body
         const query = {email: user.email}
@@ -71,6 +72,13 @@ async function run() {
             return res.send({message: 'User already exists in database', insertedId: null})
         }
         const result = await usersCollection.insertOne(user)
+        res.send(result)
+    })
+    //get user role
+    app.get('/user/:email', async(req, res) =>{
+        const email = req.params.email
+        const query = {email: email}
+        const result = await usersCollection.findOne(query)
         res.send(result)
     })
 
