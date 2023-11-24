@@ -12,7 +12,10 @@ const port = process.env.PORT || 5000
 
 //middleware
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:5173'],
+    credentials: true,
+}))
 app.use(cookieParser())
 
 
@@ -32,6 +35,8 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+
+    const usersCollection = client.db('mediVoyageDB').collection('users')
 
     //auth related api
     app.post('/jwt', async(req, res) =>{
@@ -55,6 +60,18 @@ async function run() {
         catch(err){
             res.status(500).send(err)
         }
+    })
+
+    //users related api
+    app.post('/users', async(req, res) =>{
+        const user = req.body
+        const query = {email: user.email}
+        const isExists = await usersCollection.findOne(query)
+        if(isExists){
+            return res.send({message: 'User already exists in database', insertedId: null})
+        }
+        const result = await usersCollection.insertOne(user)
+        res.send(result)
     })
 
 
