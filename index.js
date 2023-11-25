@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
@@ -117,6 +117,13 @@ async function run() {
     //get all camps
     app.get('/camps', async(req, res) =>{
         const result = await campsCollection.find().toArray()
+        res.send(result)
+    })
+    //get specific camps
+    app.get('/camps/:id', async(req, res) =>{
+        const id = req.params.id
+        const query = {_id: new ObjectId(id)}
+        const result = await campsCollection.findOne(query)
         res.send(result)
     })
     //add camp api
