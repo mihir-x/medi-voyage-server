@@ -52,6 +52,7 @@ async function run() {
     // await client.connect();
 
     const usersCollection = client.db('mediVoyageDB').collection('users')
+    const campsCollection = client.db('mediVoyageDB').collection('camps')
 
     //auth related api
     app.post('/jwt', async(req, res) =>{
@@ -94,6 +95,14 @@ async function run() {
         const email = req.params.email
         const query = {email: email}
         const result = await usersCollection.findOne(query)
+        res.send(result)
+    })
+
+    //camp related api---------------------------------
+    //add camp api
+    app.post('/camps', verifyToken, async(req, res) =>{
+        const item = req.body
+        const result = await campsCollection.insertOne(item)
         res.send(result)
     })
 
