@@ -114,6 +114,11 @@ async function run() {
     })
 
     //camp related api---------------------------------
+    //get all camps
+    app.get('/camps', async(req, res) =>{
+        const result = await campsCollection.find().toArray()
+        res.send(result)
+    })
     //add camp api
     app.post('/camps', verifyToken, async(req, res) =>{
         const item = req.body
