@@ -97,6 +97,21 @@ async function run() {
         const result = await usersCollection.findOne(query)
         res.send(result)
     })
+    //update user data
+    app.patch('/users/:email', async(req, res) =>{
+        const email = req.params.email
+        const query = {email: email}
+        const {name, phone, photo} = req.body
+        const updateDoc = {
+            $set:{
+                name: name,
+                phone: phone,
+                photo: photo,
+            }
+        }
+        const result = await usersCollection.updateOne(query, updateDoc)
+        res.send(result)
+    })
 
     //camp related api---------------------------------
     //add camp api
