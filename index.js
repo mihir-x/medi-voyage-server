@@ -120,6 +120,11 @@ async function run() {
         const result = await campsCollection.find().toArray()
         res.send(result)
     })
+    //get popular camps
+    app.get('/camps/popular', async(req, res) =>{
+        const result = await campsCollection.find().sort({participant: -1}).limit(6).toArray()
+        res.send(result)
+    })
     //get specific camps
     app.get('/camps/:id', async(req, res) =>{
         const id = req.params.id
@@ -127,7 +132,7 @@ async function run() {
         const result = await campsCollection.findOne(query)
         res.send(result)
     })
-    //add camp api
+    //add camp into database
     app.post('/camps', verifyToken, async(req, res) =>{
         const item = req.body
         const result = await campsCollection.insertOne(item)
