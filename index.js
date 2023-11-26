@@ -132,6 +132,13 @@ async function run() {
         const result = await campsCollection.findOne(query)
         res.send(result)
     })
+    //get organizer camps
+    app.get('/camps/myCamps/:email', async(req, res) =>{
+        const email = req.params.email
+        const query = {organizer:email}
+        const result = await campsCollection.find(query).toArray()
+        res.send(result)
+    })
     //add camp into database
     app.post('/camps', verifyToken, async(req, res) =>{
         const item = req.body
@@ -149,6 +156,13 @@ async function run() {
         const result = await campsCollection.updateOne(query, {
             $inc: { participant: participant}
         })
+        res.send(result)
+    })
+    //delete camp
+    app.delete('/delete-camp/:id', async(req, res) =>{
+        const id = req.params.id
+        const query = {_id: new ObjectId(id)}
+        const result = await campsCollection.deleteOne(query)
         res.send(result)
     })
 
