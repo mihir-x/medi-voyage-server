@@ -158,6 +158,20 @@ async function run() {
         })
         res.send(result)
     })
+    //update camp data
+    app.put('/update-camp/:id', async(req, res) =>{
+        const id = req.params.id
+        const camp = req.body
+        const query = { _id: new ObjectId(id)}
+        const options = {upsert: true}
+        const updateDoc = {
+            $set:{
+                ...camp
+            }
+        }
+        const result = await campsCollection.updateOne(query, updateDoc, options)
+        res.send(result)
+    })
     //delete camp
     app.delete('/delete-camp/:id', async(req, res) =>{
         const id = req.params.id
