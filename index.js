@@ -158,6 +158,19 @@ async function run() {
         })
         res.send(result)
     })
+    //decrement participant count in camp data
+    app.patch('/camps/decrement/:id', async(req, res) =>{
+        const id = req.params.id
+        const {participant} = req.body
+        if(typeof participant!== 'number' || participant<0){
+            return res.status(400).send({message: 'Invalid participant count'})
+        }
+        const query = {_id: new ObjectId(id)}
+        const result = await campsCollection.updateOne(query, {
+            $inc: { participant: -1}
+        })
+        res.send(result)
+    })
     //update camp data
     app.put('/update-camp/:id', async(req, res) =>{
         const id = req.params.id
@@ -181,6 +194,14 @@ async function run() {
     })
 
     //participation related api---------------------------------------------------------
+    //get participated camps of a organizer
+    app.get('/participation/:email', async(req,res)=>{
+        const email = req.params.email
+        const query = {organizer: email}
+        const result = await participationCollection.find(query).toArray()
+        res.send(result)
+    })
+    //save participated camp in database
     app.post('/participation', async(req, res) =>{
         const registeredCamp = req.body
         const query = {participant: registeredCamp.participant, campId: registeredCamp.campId}
@@ -189,6 +210,13 @@ async function run() {
             return res.status(409).send({message: 'You have already registered for this camp'})
         }
         const result = await participationCollection.insertOne(registeredCamp)
+        res.send(result)
+    })
+    //delete participation from database
+    app.delete('/participation/delete/:id', async(req, res) =>{
+        const id = req.params.id
+        const query = {_id: new ObjectId(id)}
+        const result = await participationCollection.deleteOne(query)
         res.send(result)
     })
 
