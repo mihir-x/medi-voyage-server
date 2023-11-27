@@ -14,7 +14,10 @@ const port = process.env.PORT || 5000
 //middleware
 app.use(express.json())
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: [
+        'http://localhost:5173',
+        'https://luminous-sherbet-6eb0c1.netlify.app'
+    ],
     credentials: true,
 }))
 app.use(cookieParser())
@@ -57,6 +60,7 @@ async function run() {
     const participationCollection = client.db('mediVoyageDB').collection('participation')
     const paymentCollection = client.db('mediVoyageDB').collection('payment')
     const reviewCollection = client.db('mediVoyageDB').collection('review')
+    const upcomingCollection = client.db('mediVoyageDB').collection('upcoming')
 
     //auth related api
     app.post('/jwt', async(req, res) =>{
@@ -314,6 +318,20 @@ async function run() {
             payment: 'Paid',
         }
         const result = await paymentCollection.find(query).toArray()
+        res.send(result)
+    })
+
+    //bonus section api-------------------------------------------------------------------------------------
+    //upcoming camp related api------------------------
+    //get upcoming camp from database
+    app.get('/upcoming-camp', async(req, res) =>{
+        const result = await upcomingCollection.find().limit(6).toArray()
+        res.send(result)
+    })
+    //save upcoming camp to database
+    app.post('/upcoming-camp',verifyToken, async(req, res) =>{
+        const upcomingCamp = req.body
+        const result = await upcomingCollection.insertOne(upcomingCamp)
         res.send(result)
     })
 
