@@ -221,6 +221,25 @@ async function run() {
         const result = await participationCollection.insertOne(registeredCamp)
         res.send(result)
     })
+    //participation confirmation api
+    app.patch('/participation/confirm/:id', async(req, res) =>{
+        const id = req.params.id
+        const participationQuery = {
+            _id: new ObjectId(id)
+        }
+        const paymentQuery = {
+            registerId: id
+        }
+        const updateApproval ={
+            $set: {
+                approval: 'Confirmed'
+            }
+        }
+        const registerApproval = await participationCollection.updateOne(participationQuery, updateApproval)
+        const paymentApproval = await paymentCollection.updateOne(paymentQuery, updateApproval)
+        
+        res.send({registerApproval, paymentApproval})
+    })
     //delete participation from database
     app.delete('/participation/delete/:id', async(req, res) =>{
         const id = req.params.id
