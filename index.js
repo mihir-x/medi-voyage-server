@@ -210,6 +210,16 @@ async function run() {
         const result = await participationCollection.find(query).toArray()
         res.send(result)
     })
+    //get confirmed camps of a participant
+    app.get('/participation/confirmed/:email', async(req, res)=>{
+        const email = req.params.email
+        const query = {
+            participant: email,
+            approval: 'Confirmed',
+        }
+        const result = await participationCollection.find(query).toArray()
+        res.send(result)
+    })
     //save participated camp in database
     app.post('/participation', async(req, res) =>{
         const registeredCamp = req.body
