@@ -263,6 +263,17 @@ async function run() {
         res.send({savePayment, updatePayment})
     })
 
+    //get paid camp data for a user
+    app.get('/paid-camp/:email', async(req, res)=>{
+        const email = req.params.email
+        const query = {
+            email: email,
+            payment: 'Paid',
+        }
+        const result = await paymentCollection.find(query).toArray()
+        res.send(result)
+    })
+
 
 
     // Send a ping to confirm a successful connection
