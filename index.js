@@ -56,6 +56,7 @@ async function run() {
     const campsCollection = client.db('mediVoyageDB').collection('camps')
     const participationCollection = client.db('mediVoyageDB').collection('participation')
     const paymentCollection = client.db('mediVoyageDB').collection('payment')
+    const reviewCollection = client.db('mediVoyageDB').collection('review')
 
     //auth related api
     app.post('/jwt', async(req, res) =>{
@@ -255,6 +256,13 @@ async function run() {
         const id = req.params.id
         const query = {_id: new ObjectId(id)}
         const result = await participationCollection.deleteOne(query)
+        res.send(result)
+    })
+
+    //review related api-------------------------------------------------
+    app.post('/review', async(req, res) =>{
+        const review = req.body
+        const result = await reviewCollection.insertOne(review)
         res.send(result)
     })
 
