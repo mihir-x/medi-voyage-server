@@ -328,6 +328,13 @@ async function run() {
         const result = await upcomingCollection.find().limit(6).toArray()
         res.send(result)
     })
+    //get individual upcoming camp data
+    app.get('/upcoming-camp/:id', async(req,res) =>{
+        const id = req.params.id
+        const query = {_id: new ObjectId(id)}
+        const result = await upcomingCollection.findOne(query)
+        res.send(result)
+    })
     //save upcoming camp to database
     app.post('/upcoming-camp',verifyToken, async(req, res) =>{
         const upcomingCamp = req.body
