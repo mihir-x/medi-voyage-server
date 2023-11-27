@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 
@@ -54,6 +55,7 @@ async function run() {
     const usersCollection = client.db('mediVoyageDB').collection('users')
     const campsCollection = client.db('mediVoyageDB').collection('camps')
     const participationCollection = client.db('mediVoyageDB').collection('participation')
+    const paymentCollection = client.db('mediVoyageDB').collection('payment')
 
     //auth related api
     app.post('/jwt', async(req, res) =>{
@@ -201,7 +203,7 @@ async function run() {
         const result = await participationCollection.find(query).toArray()
         res.send(result)
     })
-    //get participated camps of a participant
+    //get registered camps of a participant
     app.get('/participation/participant/:email', async(req,res)=>{
         const email = req.params.email
         const query = {participant: email}
@@ -225,6 +227,40 @@ async function run() {
         const query = {_id: new ObjectId(id)}
         const result = await participationCollection.deleteOne(query)
         res.send(result)
+    })
+
+
+    //payment intent(generate payment secret for client)
+    app.post('/create-payment-intent', async(req, res) =>{
+        const {price} = req.body
+        const amount = parseInt(price*100)
+        if(!price || amount<1){
+            return
+        }
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount,
+            currency: 'usd',
+            payment_method_types: ['card'],
+        })
+        res.send({
+            clientSecret: paymentIntent.client_secret
+        })
+    })
+    //save payment and update registered payment status
+    app.put('/payment/:id', async(req, res) =>{
+        const id = req.params.id
+        const paymentInfo = req.body
+        const savePayment = await paymentCollection.insertOne(paymentInfo)
+        const query = {
+            _id: new ObjectId(id)
+        }
+        const updateDoc ={
+            $set:{
+                payment: 'Paid'
+            }
+        }
+        const updatePayment = await participationCollection.updateOne(query,updateDoc)
+        res.send({savePayment, updatePayment})
     })
 
 
