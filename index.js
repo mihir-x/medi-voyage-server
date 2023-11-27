@@ -259,7 +259,13 @@ async function run() {
         res.send(result)
     })
 
-    //review related api-------------------------------------------------
+    //review related api-------------------------------------------------------------
+    //get top 3 testimonials
+    app.get('/testimonials', async(req,res) =>{
+        const result = await reviewCollection.find().sort({reviewDate: -1}).limit(3).toArray()
+        res.send(result)
+    })
+    //post user review
     app.post('/review', async(req, res) =>{
         const review = req.body
         const result = await reviewCollection.insertOne(review)
