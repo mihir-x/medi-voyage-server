@@ -350,6 +350,19 @@ async function run() {
         const result = await upcomingCollection.insertOne(upcomingCamp)
         res.send(result)
     })
+    //update upcoming camp
+    app.put('/update/upcoming-camp/:id', verifyToken, async(req, res)=>{
+        const id = req.params.id
+        const upcomingCamp = req.body
+        const query = { _id: new ObjectId(id)}
+        const updateDoc = {
+            $set: {
+                ...upcomingCamp
+            }
+        }
+        const result = await upcomingCollection.updateOne(query, updateDoc)
+        res.send(result)
+    })
     //join upcoming for professionals
     app.put('/upcoming/interested', verifyToken, async(req, res) =>{
         const camp = req.body
