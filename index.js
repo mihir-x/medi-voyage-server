@@ -61,6 +61,7 @@ async function run() {
     const paymentCollection = client.db('mediVoyageDB').collection('payment')
     const reviewCollection = client.db('mediVoyageDB').collection('review')
     const upcomingCollection = client.db('mediVoyageDB').collection('upcoming')
+    const upcomingJoinCollection = client.db('mediVoyageDB').collection('upcomingJoin')
 
     //auth related api
     app.post('/jwt', async(req, res) =>{
@@ -339,6 +340,31 @@ async function run() {
     app.post('/upcoming-camp',verifyToken, async(req, res) =>{
         const upcomingCamp = req.body
         const result = await upcomingCollection.insertOne(upcomingCamp)
+        res.send(result)
+    })
+    //join upcoming
+    app.put('/upcoming/interested', verifyToken, async(req, res) =>{
+        const camp = req.body
+        const professional = camp.name
+        const professionalsEmail = camp.participant
+        const query2 = {
+            participant: camp.participant,
+            campId: camp.campId,
+        }
+        const isExists = await upcomingJoinCollection.findOne(query2)
+        if(isExists){
+            return res.status(409).send({message: 'User have already joined', insertedId: null})
+        }
+        const query = {_id: new ObjectId(camp.campId)}
+        const options = { upsert: true}
+        const updateUpcoming = await upcomingCollection.updateOne(query, {
+            $inc:{interestedProfessional: 1},
+            $push:{
+                professionals:professional,
+                professionalsEmail: professionalsEmail,
+            }
+        },options)
+        const result = await upcomingJoinCollection.insertOne(camp)
         res.send(result)
     })
 
