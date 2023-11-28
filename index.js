@@ -62,6 +62,7 @@ async function run() {
     const reviewCollection = client.db('mediVoyageDB').collection('review')
     const upcomingCollection = client.db('mediVoyageDB').collection('upcoming')
     const upcomingJoinCollection = client.db('mediVoyageDB').collection('upcomingJoin')
+    const upcomingJoinParticipantCollection = client.db('mediVoyageDB').collection('upcomingJoinParticipant')
 
     //auth related api
     app.post('/jwt', async(req, res) =>{
@@ -329,6 +330,13 @@ async function run() {
         const result = await upcomingCollection.find().limit(6).toArray()
         res.send(result)
     })
+    //get upcoming camps of a organizer
+    app.get('/upcoming-camps/myCamps/:email', async(req, res) =>{
+        const email = req.params.email
+        const query = {organizer:email}
+        const result = await upcomingCollection.find(query).toArray()
+        res.send(result)
+    })
     //get individual upcoming camp data
     app.get('/upcoming-camp/:id', async(req,res) =>{
         const id = req.params.id
@@ -342,7 +350,7 @@ async function run() {
         const result = await upcomingCollection.insertOne(upcomingCamp)
         res.send(result)
     })
-    //join upcoming
+    //join upcoming for professionals
     app.put('/upcoming/interested', verifyToken, async(req, res) =>{
         const camp = req.body
         const professional = camp.name
@@ -365,6 +373,29 @@ async function run() {
             }
         },options)
         const result = await upcomingJoinCollection.insertOne(camp)
+        res.send(result)
+    })
+    //join upcoming for participant
+    app.put('/upcoming/interested/participant', verifyToken, async(req, res) =>{
+        const camp = req.body
+        const participantsEmail = camp.participant
+        const query2 = {
+            participant: camp.participant,
+            campId: camp.campId,
+        }
+        const isExists = await upcomingJoinParticipantCollection.findOne(query2)
+        if(isExists){
+            return res.status(409).send({message: 'User have already joined', insertedId: null})
+        }
+        const query = {_id: new ObjectId(camp.campId)}
+        const options = { upsert: true}
+        const updateUpcoming = await upcomingCollection.updateOne(query, {
+            $inc:{interestedParticipant: 1},
+            $push:{
+                participantsEmail: participantsEmail,
+            }
+        },options)
+        const result = await upcomingJoinParticipantCollection.insertOne(camp)
         res.send(result)
     })
 
