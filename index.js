@@ -398,6 +398,15 @@ async function run() {
         const result = await upcomingJoinParticipantCollection.insertOne(camp)
         res.send(result)
     })
+    //delete upcoming camp
+    app.delete('/upcoming-camp/delete/:id', async(req, res) =>{
+        const id = req.params.id
+        const query = {_id: new ObjectId(id)}
+        const result = await upcomingCollection.deleteOne(query)
+        const result2 = await upcomingJoinCollection.deleteMany({campId:id})
+        const result3 = await upcomingJoinParticipantCollection.deleteMany({campId:id})
+        res.send(result)
+    })
 
 
 
