@@ -101,14 +101,14 @@ async function run() {
         res.send(result)
     })
     //get user role
-    app.get('/user/:email', async(req, res) =>{
+    app.get('/user/:email', verifyToken, async(req, res) =>{
         const email = req.params.email
         const query = {email: email}
         const result = await usersCollection.findOne(query)
         res.send(result)
     })
     //update user data
-    app.patch('/users/:email', async(req, res) =>{
+    app.patch('/users/:email', verifyToken, async(req, res) =>{
         const email = req.params.email
         const query = {email: email}
         const {name, phone, photo} = req.body
@@ -129,6 +129,13 @@ async function run() {
         const result = await campsCollection.find().toArray()
         res.send(result)
     })
+    //get searched camps
+    app.get('/camps/searched/:searched', async(req, res) =>{
+        const searched = req.params.searched
+        const query = {name: searched}
+        const result = await campsCollection.findOne(query)
+        res.send(result)
+    })
     //get popular camps
     app.get('/camps/popular', async(req, res) =>{
         const result = await campsCollection.find().sort({participant: -1}).limit(6).toArray()
@@ -142,20 +149,20 @@ async function run() {
         res.send(result)
     })
     //get organizer camps
-    app.get('/camps/myCamps/:email', async(req, res) =>{
+    app.get('/camps/myCamps/:email', verifyToken, async(req, res) =>{
         const email = req.params.email
         const query = {organizer:email}
         const result = await campsCollection.find(query).toArray()
         res.send(result)
     })
     //add camp into database
-    app.post('/camps', verifyToken, async(req, res) =>{
+    app.post('/camps', verifyToken, verifyToken, async(req, res) =>{
         const item = req.body
         const result = await campsCollection.insertOne(item)
         res.send(result)
     })
     //increment participant count in camp data
-    app.patch('/camps/:id', async(req, res) =>{
+    app.patch('/camps/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const {participant} = req.body
         if(typeof participant!== 'number' || participant<0){
@@ -168,7 +175,7 @@ async function run() {
         res.send(result)
     })
     //decrement participant count in camp data
-    app.patch('/camps/decrement/:id', async(req, res) =>{
+    app.patch('/camps/decrement/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const {participant} = req.body
         if(typeof participant!== 'number' || participant<0){
@@ -181,7 +188,7 @@ async function run() {
         res.send(result)
     })
     //update camp data
-    app.put('/update-camp/:id', async(req, res) =>{
+    app.put('/update-camp/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const camp = req.body
         const query = { _id: new ObjectId(id)}
@@ -195,7 +202,7 @@ async function run() {
         res.send(result)
     })
     //delete camp
-    app.delete('/delete-camp/:id', async(req, res) =>{
+    app.delete('/delete-camp/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const query = {_id: new ObjectId(id)}
         const result = await campsCollection.deleteOne(query)
@@ -204,21 +211,21 @@ async function run() {
 
     //participation related api---------------------------------------------------------
     //get participated camps of a organizer
-    app.get('/participation/:email', async(req,res)=>{
+    app.get('/participation/:email', verifyToken, async(req,res)=>{
         const email = req.params.email
         const query = {organizer: email}
         const result = await participationCollection.find(query).toArray()
         res.send(result)
     })
     //get registered camps of a participant
-    app.get('/participation/participant/:email', async(req,res)=>{
+    app.get('/participation/participant/:email', verifyToken, async(req,res)=>{
         const email = req.params.email
         const query = {participant: email}
         const result = await participationCollection.find(query).toArray()
         res.send(result)
     })
     //get confirmed camps of a participant
-    app.get('/participation/confirmed/:email', async(req, res)=>{
+    app.get('/participation/confirmed/:email', verifyToken, async(req, res)=>{
         const email = req.params.email
         const query = {
             participant: email,
@@ -228,7 +235,7 @@ async function run() {
         res.send(result)
     })
     //save participated camp in database
-    app.post('/participation', async(req, res) =>{
+    app.post('/participation', verifyToken, async(req, res) =>{
         const registeredCamp = req.body
         const query = {participant: registeredCamp.participant, campId: registeredCamp.campId}
         const isExists = await participationCollection.findOne(query)
@@ -239,7 +246,7 @@ async function run() {
         res.send(result)
     })
     //participation confirmation api
-    app.patch('/participation/confirm/:id', async(req, res) =>{
+    app.patch('/participation/confirm/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const participationQuery = {
             _id: new ObjectId(id)
@@ -258,7 +265,7 @@ async function run() {
         res.send({registerApproval, paymentApproval})
     })
     //delete participation from database
-    app.delete('/participation/delete/:id', async(req, res) =>{
+    app.delete('/participation/delete/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const query = {_id: new ObjectId(id)}
         const result = await participationCollection.deleteOne(query)
@@ -272,7 +279,7 @@ async function run() {
         res.send(result)
     })
     //post user review
-    app.post('/review', async(req, res) =>{
+    app.post('/review', verifyToken, async(req, res) =>{
         const review = req.body
         const result = await reviewCollection.insertOne(review)
         res.send(result)
@@ -280,7 +287,7 @@ async function run() {
 
 
     //payment intent(generate payment secret for client)
-    app.post('/create-payment-intent', async(req, res) =>{
+    app.post('/create-payment-intent', verifyToken, async(req, res) =>{
         const {price} = req.body
         const amount = parseInt(price*100)
         if(!price || amount<1){
@@ -296,7 +303,7 @@ async function run() {
         })
     })
     //save payment and update registered payment status
-    app.put('/payment/:id', async(req, res) =>{
+    app.put('/payment/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const paymentInfo = req.body
         const savePayment = await paymentCollection.insertOne(paymentInfo)
@@ -313,7 +320,7 @@ async function run() {
     })
 
     //get paid camp data for a user
-    app.get('/paid-camp/:email', async(req, res)=>{
+    app.get('/paid-camp/:email', verifyToken, async(req, res)=>{
         const email = req.params.email
         const query = {
             email: email,
@@ -331,7 +338,7 @@ async function run() {
         res.send(result)
     })
     //get upcoming camps of a organizer
-    app.get('/upcoming-camps/myCamps/:email', async(req, res) =>{
+    app.get('/upcoming-camps/myCamps/:email', verifyToken, async(req, res) =>{
         const email = req.params.email
         const query = {organizer:email}
         const result = await upcomingCollection.find(query).toArray()
@@ -364,7 +371,7 @@ async function run() {
         res.send(result)
     })
     //get the upcoming camps that a professional has joined
-    app.get('/upcoming/professional/:email', async(req, res) =>{
+    app.get('/upcoming/professional/:email', verifyToken, async(req, res) =>{
         const email = req.params.email
         const query = {
             participant: email
@@ -421,7 +428,7 @@ async function run() {
         res.send(result)
     })
     //delete upcoming camp
-    app.delete('/upcoming-camp/delete/:id', async(req, res) =>{
+    app.delete('/upcoming-camp/delete/:id', verifyToken, async(req, res) =>{
         const id = req.params.id
         const query = {_id: new ObjectId(id)}
         const result = await upcomingCollection.deleteOne(query)
