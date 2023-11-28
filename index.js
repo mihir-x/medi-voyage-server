@@ -363,6 +363,15 @@ async function run() {
         const result = await upcomingCollection.updateOne(query, updateDoc)
         res.send(result)
     })
+    //get the upcoming camps that a professional has joined
+    app.get('/upcoming/professional/:email', async(req, res) =>{
+        const email = req.params.email
+        const query = {
+            participant: email
+        }
+        const result = await upcomingJoinCollection.find(query).toArray()
+        res.send(result)
+    })
     //join upcoming for professionals
     app.put('/upcoming/interested', verifyToken, async(req, res) =>{
         const camp = req.body
