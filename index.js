@@ -89,6 +89,14 @@ async function run() {
     })
 
     //users related api--------------------------------------------------------------
+    //get top 3 organizers
+    app.get('/all-organizers', async(req, res) =>{
+        const query = {
+            role: 'Organizer'
+        }
+        const result = await usersCollection.find(query).limit(3).toArray()
+        res.send(result)
+    })
     //save user info into database
     app.post('/users', async(req, res) =>{
         const user = req.body
@@ -108,7 +116,7 @@ async function run() {
         res.send(result)
     })
     //update user data
-    app.patch('/users/:email', verifyToken, async(req, res) =>{
+    app.patch('/users/:email', async(req, res) =>{
         const email = req.params.email
         const query = {email: email}
         const {name, phone, photo} = req.body
