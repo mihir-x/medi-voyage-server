@@ -10,6 +10,12 @@ const cookieParser = require('cookie-parser')
 const app = express()
 const port = process.env.PORT || 5000
 
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+
+const mg = mailgun.client({ username: 'api', key: process.env.MAIL_GUN_API_KEY || 'key-yourkeyhere' });
+
 
 //middleware
 app.use(express.json())
