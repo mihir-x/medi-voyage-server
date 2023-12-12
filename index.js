@@ -156,6 +156,11 @@ async function run() {
             const result = await campsCollection.find().sort({ participant: -1 }).limit(6).toArray()
             res.send(result)
         })
+        //get latest camp
+        app.get('/camps/latest', async (req, res) => {
+            const result = await campsCollection.find().sort({ createdAt: -1 }).limit(1).toArray()
+            res.send(result[0])
+        })
         //get specific camps
         app.get('/camps/:id', async (req, res) => {
             const id = req.params.id
